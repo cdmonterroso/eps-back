@@ -1,0 +1,26 @@
+FROM node:20-alpine
+
+# Se le indica a todo el archivo dockerfile que la carpeta de trabajo será la de WORKDIR
+# RUN npm i -g nodemon
+# RUN mkdir -p /myBack
+WORKDIR /myBack
+
+# Colocando /myBack o . es equivalente
+COPY package.json .  
+RUN npm install
+
+RUN npm i -g nodemon
+
+# copiando el resto de archivos del proyecto a la carpeta /back
+# source dest
+COPY . . 
+# Al utilizar un volume en el archivo docker-compose-dev.yml, automaticamente se copiarán los archivos
+
+# EXPOSE 3000
+# CMD npm start
+#CMD npm dev
+CMD [ "npx", "nodemon" , "src/index.js" ]
+
+
+#CONSTRUIR IMAGEN  : docker build -t node_ddo .
+#El . indica que el dockerfile está en la ruta actual, sin necsidad de ir a otra carpeta
