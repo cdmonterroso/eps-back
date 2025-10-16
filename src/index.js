@@ -32,7 +32,8 @@ app.use(
 const keycloak = new Keycloak({ store: memoryStore }, {
   clientId: 'cliente_nodejs',
   bearerOnly: true,
-  serverUrl: 'http://localhost:8080',
+  //serverUrl: 'http://localhost:8080',
+  serverUrl: 'http://10.17.1.36:3092',
   realm: 'ddo',
   credentials: {
     secret: '07GIrDkQdpKSNVxMVwLtwR6ow8FOzcBr',
@@ -99,4 +100,4 @@ app.use(routerUsuarios);
 
 //AL USAR DOCKER-COMPOSE, CAMBIAR A NODE_DOCKER_PORT
 //app.listen(process.env.NODE_LOCAL_PORT, () => console.log('Running on port ' + process.env.NODE_LOCAL_PORT));
-app.listen(process.env.NODE_DOCKER_PORT, () => console.log('Running on port ' + process.env.NODE_DOCKER_PORT));
+app.listen(process.env.NODE_DOCKER_PORT, "0.0.0.0", () => console.log('Running on port ' + process.env.NODE_DOCKER_PORT));
