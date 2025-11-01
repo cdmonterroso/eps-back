@@ -16,7 +16,11 @@ RUN npm install
 COPY . .
 
 # EXPOSE 3000
+<<<<<<< HEAD
 EXPOSE 3090
+=======
+EXPOSE 3090 
+>>>>>>> 266ba10 (update port dockerfile)
 EXPOSE 3000
 
 #CMD npm start
