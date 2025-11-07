@@ -4,32 +4,49 @@ version: '3.8'
 services:
   # CONTENEDOR PARA MYSQL
   mysqldb:
-    image: mysql:9.0.1
+    image: mysql:8.0
+    container_name: db-sidecc-ddo
+    hostname: db-sidecc-ddo
+    #restart: always
     env_file:
       - ./.env
     environment:
+      - MYSQL_LOCAL_INFILE=1
       - MYSQL_ROOT_PASSWORD=$MYSQLDB_PASSWORD
       - MYSQL_DATABASE=$MYSQLDB_DATABASE
+    command:
+      - --local-infile=1
     ports:
       # SO ANFITRIÓN : CONTENEDOR
-      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+      #- $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+      - 3093:3306
     volumes:
+      #- ./data:/docker-entrypoint-initdb.d
       - node-mysql:/var/lib/mysql
+      #- ./my-custom.cnf:/etc/mysql/conf.d/my-custom.cnf
 
   # CONTENEDOR PARA NODEJS
   back:
-    # con el . indico que el archivo para construir está en la misma carpeta del docker-compose
+    # con el . indico que el archivo dockerfile para construir está en la misma carpeta del docker-compose
     build: .
-    depends_on:
-      - mysqldb
-    links:
-      - mysqldb
+    image: back-sidecc-ddo:v1
+    container_name: back-app-sidecc-ddo
+    hostname: back-app-sidecc-ddo
     env_file:
       - ./.env
     ports:
-    # SO ANFITRIÓN : CONTENEDOR
-      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
-
+      # SO ANFITRIÓN : CONTENEDOR
+      #- $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+      - 3090:3090
+    environment:
+      # Variables de entorno para que la app Node se conecte a la DB
+      DB_HOST: mysqldb
+      DB_USER: root
+      DB_PASSWORD: ${MYSQLDB_PASSWORD} #coincidir con la de MYSQL_ROOT_PASSWORD
+      DB_NAME: ${MYSQLDB_DATABASE}
+      PORT: 3000 #Puerto donde escucha docker (está bien)
+    depends_on:
+      - mysqldb
 
 volumes:
   node-mysql:
@@ -39,7 +56,8 @@ volumes:
 #al usar nuevamente docker compose up (luego de parar todo) utiliza los contenedores que ya había creado anteriormente
 
 #docker compose down
-#elimina todos los contenedores e 'imagenes' que se crearon
+#elimina todos los contenedores y redes que se crearon, agregar '--rmi all' para eliminar también las imágenes
 
+#docker-compose down -v //elimina los volumenes
 
 #docker compose up --build (build forzará la construcción de las imágenes, para cuando se haga cambios en el código nodejs)
