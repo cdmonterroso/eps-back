@@ -5,6 +5,7 @@ const axios = require('axios');
 const morgan = require('morgan');
 const cors = require ("cors");
 const bodyParser = require('body-parser');
+const pool = require('./config/db')
 const {config} = require('dotenv');
 config();
 
@@ -69,13 +70,6 @@ app.get('/protected', keycloak.protect(), (req, res) => {
     res.json({ message: 'Acceso permitido', user: req.kauth.grant.access_token.content });
 });
 
-
-app.get('/', (req, res) => {
-    res.send('Hola, Proyecto EPS');
-    console.log('Bienvenido!');
-});
-
-
 app.post('/logout', keycloak.protect(), async (req, res)=> {
     const token = req.kauth.grant.access_token.token; // Token del usuario actual
     try {
@@ -85,6 +79,64 @@ app.post('/logout', keycloak.protect(), async (req, res)=> {
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
         res.status(500).json({ message: 'Error al cerrar sesión' });
+    }
+});
+
+
+app.get('/', (req, res) => {
+    res.send('Hola, Proyecto EPS');
+    console.log('Bienvenido!');
+});
+
+//Endpoint para obtener todas las unidades ejecutoras almacenadas
+app.get('/unidades', async (req, res) => {
+    try {
+        // Usamos 'await' para esperar la respuesta de la base de datos
+        // pool.query() usa una conexión del pool y la libera automáticamente
+        const [rows] = await pool.query('SELECT * FROM unidades_ejecutoras');
+        
+        console.log(`Consulta exitosa, ${rows.length} filas devueltas.`);
+        // Devolvemos los resultados como un JSON
+        res.json(rows);
+
+    } catch (error) {
+        // Si algo sale mal, capturamos el error
+        console.error('Error al consultar la base de datos: ', error);
+        res.status(500).json({
+            message: 'Error interno del servidor al consultar la base de datos'
+        });
+    }
+});
+
+//Endpoint para obtener los subprogrmas de una unidad ejecutora en específico 
+app.get('/unidades/:codigo_unidad/subprogramas', async (req, res) => {
+    const { codigo } = req.params;
+    try {
+        const [rows] = await pool.query(
+            // Hacemos un JOIN para obtener también el nombre de la unidad ejecutora
+            `SELECT 
+                s.id_subprograma, 
+                s.partida, 
+                s.nombre_subprograma, 
+                s.codigo_unidad_fk,
+                u.nombre_unidad 
+             FROM subprogramas s
+             JOIN unidades_ejecutoras u ON s.codigo_unidad_fk = u.codigo_unidad
+             WHERE s.codigo_unidad_fk = ?`,
+            [codigo]
+        );
+        
+        if (rows.length === 0) {
+            console.log('No se encontraron subprogramas para esa unidad o la unidad no existe.');
+            return res.status(404).json({ message: 'No se encontraron subprogramas para el código de unidad ejecutora proporcionado' });
+        }
+
+        console.log(`Consulta exitosa, ${rows.length} filas devueltas.`);
+        res.json(rows);
+
+    } catch (error) {
+        console.error('Error al consultar subprogramas:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
