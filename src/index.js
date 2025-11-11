@@ -109,7 +109,7 @@ app.get('/unidades', async (req, res) => {
 });
 
 //Endpoint para obtener los subprogrmas de una unidad ejecutora en específico 
-app.get('/unidades/:codigo_unidad/subprogramas', async (req, res) => {
+app.get('/unidades/:codigo/subprogramas', async (req, res) => {
     const { codigo } = req.params;
     try {
         const [rows] = await pool.query(
