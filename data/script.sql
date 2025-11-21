@@ -2,10 +2,36 @@ use db_sidecc_ddo;
 
 -- 1. Crear la base de datos
 -- CREATE DATABASE IF NOT EXISTS db_unidades;
--- drop 
+
+-- drop table subprogramas_cursos;
 -- drop table subprogramas;
 -- drop table unidades_ejecutoras;
 -- DROP TABLE temporal;
+
+/*
+select * from unidades_ejecutoras;
+select * from subprogramas;
+select * from subprogramas_cursos;
+select * from temporal;
+
+SELECT 
+				s.id_subprograma,
+                s.partida, 
+                s.nombre_subprograma, 
+                s.codigo_unidad_fk,
+                u.nombre_unidad 
+             FROM subprogramas s
+             JOIN unidades_ejecutoras u ON s.codigo_unidad_fk = u.codigo_unidad
+             WHERE s.codigo_unidad_fk = 32;
+             
+select
+		sc.id_subprograma_fk,
+        s.partida,
+        s.codigo_unidad_fk
+        from subprogramas_cursos sc
+        join subprogramas s on sc.id_subprograma_fk = s.id_subprograma
+        where sc.id_curso = 'DDO07,64,105'  and s.partida = 105 and s.codigo_unidad_fk = 64;;
+*/
 
 
 /*
@@ -57,6 +83,7 @@ CREATE TABLE temporal (
 -- 4. Cargar los datos del CSV a la tabla temporal
 -- Esta ruta funciona porque el CSV estará en el mismo directorio de inicialización
 -- LOAD DATA INFILE '/docker-entrypoint-initdb.d/UNIDADES_SUBPROGRAMA.csv'
+
 SET GLOBAL local_infile = 1;
 -- LOAD DATA LOCAL INFILE 'D:/Users/Daniel/Downloads/UNIDADES_SUBPROGRAMA.csv'
 -- LOAD DATA LOCAL INFILE '/docker-entrypoint-initdb.d/unidades_subprogramas.csv'

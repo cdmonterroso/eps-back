@@ -251,11 +251,15 @@ routerUsuarios.post('/getPuestoTrabajo', async (req, res) => {
             }
             const codigoUnidad = result.RESPUESTA_DATOS_TRABAJADOR.DETALLE_PUESTOS.CODIGO_UNIDAD
             const codigoSubUnidad = result.RESPUESTA_DATOS_TRABAJADOR.DETALLE_PUESTOS.COD_SUB_UNIDAD
+            const nombreUnidad = result.RESPUESTA_DATOS_TRABAJADOR.DETALLE_PUESTOS.NOMBRE_UNIDAD
+            const nombreSubUnidad = result.RESPUESTA_DATOS_TRABAJADOR.DETALLE_PUESTOS.NOMBRE_SUB_UNIDAD
             const arregloUnidad = [
                 String(codigoUnidad),
-                String(codigoSubUnidad)
+                String(codigoSubUnidad),
+                String(nombreUnidad),
+                String(nombreSubUnidad)
             ];
-            res.status(200).json(arregloUnidad); //string ("32, 105")
+            res.status(200).send(arregloUnidad); //string ("32, 105")
         });
 
 

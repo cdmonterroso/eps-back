@@ -140,6 +140,69 @@ app.get('/unidades/:codigo/subprogramas', async (req, res) => {
     }
 });
 
+//Endpoint para obtener los subprogrmas vinculados a un determinado curso (por medio de su atributo idnumber) 
+app.post('/getVinculoCursoSubprograma', async (req, res) => {
+    const { codCurso, partida, codUnidad  } = req.body;
+
+    if (!codUnidad || !partida || !codCurso) {
+        return res.status(400).json({ message: 'Faltan parametro obligatorios' });
+    }
+
+    try {
+        const [rows] = await pool.query(
+            `select
+                sc.id_subprograma_fk,
+                s.partida,
+                s.codigo_unidad_fk
+                from subprogramas_cursos sc
+                join subprogramas s on sc.id_subprograma_fk = s.id_subprograma
+                where sc.id_curso = ? and s.partida = ? and s.codigo_unidad_fk = ?`,
+            [codCurso, partida, codUnidad]
+        );
+        
+        if (rows.length === 0) {
+            console.log('La dependencia del usuario no está vinculada a este curso.');
+            return res.status(404).json({ message: 'La dependencia del usuario no está vinculada a este curso.' });
+        }
+
+        console.log(`Consulta exitosa, ${rows.length} filas devueltas.`);
+        res.json(rows);
+
+    } catch (error) {
+        console.error('Error al consultar el subprograma vinculado al curso:', error);
+        res.status(500).json({ message: 'Error interno del servidor, no se pudo consultar el subprograma vinculado al curso' });
+    }
+});
+
+//Endpoint para insertar en tabla subprogramas_cursos (matriculación)
+app.post('/vincularCurso', async (req, res) => {
+    //const { id: id_subprograma } = req.params;
+    const { idSubprograma, codCurso } = req.body; // Se espera un int "10" y string, ej: "c-101"
+    //console.log(`Recibida petición POST en /subprogramas/${id_subprograma}/cursos`);
+
+    if (!idSubprograma || !codCurso) {
+        return res.status(400).json({ message: 'Faltan parametro obligatorios' });
+    }
+
+    try {
+        await pool.query(
+            'INSERT INTO subprogramas_cursos (id_subprograma_fk, id_curso) VALUES (?, ?)',
+            [idSubprograma, codCurso]
+        );
+        res.status(201).json({ message: 'ID de curso vinculado al subprograma exitosamente' });
+    } catch (error) {
+        console.error('Error al vincular el curso:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Este ID de curso ya está vinculado a este subprograma' });
+        }
+        // Maneja si el subprograma no existe
+        if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+            return res.status(404).json({ message: 'El subprograma no existe' });
+        }
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+});
+
 //IMPORTS
 const routerCursos = require('./routers/cursos');
 const routerUsuarios = require('./routers/usuarios');
