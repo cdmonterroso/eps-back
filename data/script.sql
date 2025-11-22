@@ -31,6 +31,13 @@ select
         from subprogramas_cursos sc
         join subprogramas s on sc.id_subprograma_fk = s.id_subprograma
         where sc.id_curso = 'DDO07,64,105'  and s.partida = 105 and s.codigo_unidad_fk = 64;;
+
+DELETE sc
+FROM subprogramas_cursos sc
+JOIN subprogramas s ON sc.id_subprograma_fk = s.id_subprograma
+WHERE sc.id_curso = 'EP1125' 
+  AND s.partida = 105 
+  AND s.codigo_unidad_fk = 32;
 */
 
 
